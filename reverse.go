@@ -1,8 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 const GRID = 8
+const LIMIT = 600.0
+
+//const LIMIT = 10.0
 
 type Board struct {
 	tokens [GRID][GRID]int
@@ -25,7 +31,7 @@ func (b *Board) init() {
 func (b *Board) display() {
 	fmt.Print(" ")
 	for i := 0; i < GRID; i++ {
-		fmt.Printf("%d", i)
+		fmt.Printf(" %d", i)
 	}
 	fmt.Print("\n")
 
@@ -33,11 +39,11 @@ func (b *Board) display() {
 		fmt.Print(i)
 		for j := 0; j < GRID; j++ {
 			if b.tokens[i][j] == 0 {
-				fmt.Print(".")
+				fmt.Print(" .")
 			} else if b.tokens[i][j] == 1 {
-				fmt.Print("O")
+				fmt.Print(" O")
 			} else if b.tokens[i][j] == -1 {
-				fmt.Print("X")
+				fmt.Print(" X")
 			}
 		}
 		fmt.Print("\n")
@@ -51,18 +57,6 @@ func (b *Board) put(x, y int, u string) {
 		b.tokens[x][y] = -1
 	}
 }
-
-// func (b *Board) get(x, y int) string {
-// 	get_num := ""
-// 	if b.tokens[x][y] == 0 {
-// 		get_num = "."
-// 	} else if b.tokens[x][y] == 1 {
-// 		get_num = "O"
-// 	} else if b.tokens[x][y] == -1 {
-// 		get_num = "X"
-// 	}
-// 	return get_num
-// }
 
 // flag: true -> 反転する
 // flag: false -> チェックだけ
@@ -163,6 +157,8 @@ func main() {
 	player := 1
 	_check := 0
 	skip := 0
+	var Otime time.Time
+	var Xtime time.Time
 
 	board.init()
 
@@ -187,10 +183,44 @@ func main() {
 		// 標準入力
 		board.display()
 		fmt.Printf("[%s] Input > ", u)
-		fmt.Scan(&argv[0], &argv[1])
-		//fmt.Println(argv)
+		start := time.Now()
+		fmt.Scan(&argv[1], &argv[0])
+		end := time.Now()
+		elapsed := end.Sub(start)
 
-		// TODO: range check
+		// fmt.Println(elapsed)
+		//fmt.Printf("%T", elapsed)
+
+		//fmt.Printf("%d m %.6f s\n", Xtime.Minute(), Xtime.Second())
+		if player == 1 {
+			// "O"の時間 ++
+			Otime = Otime.Add(elapsed)
+		} else if player == -1 {
+			// "X"の時間 ++
+			Xtime = Xtime.Add(elapsed)
+		}
+		fmt.Println("O ", Otime.Format("04:05"))
+		fmt.Println("X ", Xtime.Format("04:05"))
+
+		// 持ち時間チェック
+		if Otime.Second() > LIMIT {
+			fmt.Println("O time over")
+			fmt.Print("試合終了〜\nX の勝ち！\n")
+			return
+		}
+		if Xtime.Second() > LIMIT {
+			fmt.Println("X time over")
+			fmt.Print("試合終了〜\nO の勝ち！\n")
+			return
+		}
+
+		// 盤面の外に置こうとした時にエラーを返す
+		if argv[0] < 0 || argv[0] >= GRID || argv[1] < 0 || argv[1] >= GRID {
+			fmt.Print("そこには置けません！\n")
+			continue
+		}
+
+		// 既に駒が置かれていた時にエラーを返す
 		if board.tokens[argv[0]][argv[1]] != 0 {
 			fmt.Print("そこには置けません！\n")
 			continue

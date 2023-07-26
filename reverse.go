@@ -24,10 +24,13 @@ func (b *Board) init() {
 	b.tokens[3][3] = 1
 	b.tokens[3][4] = -1
 	b.tokens[4][3] = -1
+	//b.tokens[3][4] = 1
+	//b.tokens[4][3] = 1
 	b.tokens[4][4] = 1
 
 }
 
+// 盤面を表示
 func (b *Board) display() {
 	fmt.Print(" ")
 	for i := 0; i < GRID; i++ {
@@ -109,7 +112,10 @@ func (b *Board) reverse(x, y int, u string, flag bool) int {
 	return r
 }
 
+// 1つでも置ける場所があるかの判定
 func (b *Board) check(u string) int {
+	fmt.Print("ここに置けます: ")
+	res := -1
 	for i := 0; i < GRID; i++ {
 		for j := 0; j < GRID; j++ {
 			if b.tokens[i][j] != 0 {
@@ -117,37 +123,43 @@ func (b *Board) check(u string) int {
 			}
 			r := b.reverse(i, j, u, false)
 			if r > 0 {
-				return 1
+				// (i, j)は置ける
+				//return 1
+				fmt.Printf("(%d, %d)", j, i)
+
+				res = 1
 			}
 		}
 	}
 
-	return -1
+	fmt.Print("\n")
+	return res
 }
 
+// 白と黒の駒の数を計算
 func (b *Board) count() {
-	white_count := 0
-	black_count := 0
+	O_count := 0
+	X_count := 0
 
 	for i := 0; i < GRID; i++ {
 		for j := 0; j < GRID; j++ {
 			if b.tokens[i][j] == 1 {
-				white_count++
+				O_count++
 			} else if b.tokens[i][j] == -1 {
-				black_count++
+				X_count++
 			}
 		}
 	}
 
-	if black_count > white_count {
+	if X_count < O_count {
 		fmt.Print("Oの勝利！\n")
-	} else if black_count < white_count {
+	} else if X_count > O_count {
 		fmt.Print("Xの勝利！\n")
-	} else if black_count == white_count {
+	} else if X_count == O_count {
 		fmt.Print("ひきわけ\n")
 	}
 
-	fmt.Printf("(O:%d / X:%d)\n", white_count, black_count)
+	fmt.Printf("(O:%d / X:%d)\n", O_count, X_count)
 }
 
 func main() {
@@ -184,7 +196,9 @@ func main() {
 		board.display()
 		fmt.Printf("[%s] Input > ", u)
 		start := time.Now()
-		fmt.Scan(&argv[1], &argv[0])
+		// fmt.Scan(&argv[1], &argv[0])
+		fmt.Scan(&argv[1])
+		fmt.Scan(&argv[0])
 		end := time.Now()
 		elapsed := end.Sub(start)
 
@@ -216,19 +230,19 @@ func main() {
 
 		// 盤面の外に置こうとした時にエラーを返す
 		if argv[0] < 0 || argv[0] >= GRID || argv[1] < 0 || argv[1] >= GRID {
-			fmt.Print("そこには置けません！\n")
+			fmt.Print("そこには置けません！\n\n")
 			continue
 		}
 
 		// 既に駒が置かれていた時にエラーを返す
 		if board.tokens[argv[0]][argv[1]] != 0 {
-			fmt.Print("そこには置けません！\n")
+			fmt.Print("そこには置けません！\n\n")
 			continue
 		}
 
 		r := board.reverse(argv[0], argv[1], u, true)
 		if r == 0 {
-			fmt.Print("そこには置けません！\n")
+			fmt.Print("そこには置けません！\n\n")
 			continue
 		}
 		board.put(argv[0], argv[1], u)
@@ -239,6 +253,7 @@ func main() {
 		} else if player == -1 {
 			u = "X"
 		}
+		fmt.Print("\n")
 	}
 	board.display()
 	fmt.Print("試合終了〜\n")

@@ -1,9 +1,3 @@
-first push
+# reverse
 
-command list
-
-go run <>.go
-
-他のリポジトリで分担作業する場合
-git clone <>.git
-git checkout develop
+This is a reverse program.
